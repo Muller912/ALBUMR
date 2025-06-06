@@ -54,14 +54,13 @@ const abrirBtn = document.getElementById("abrir-sobre");
 const timerDiv = document.getElementById("timer");
 const imgSobreBloqueado = document.getElementById("sobre-bloqueado-img");
 
-let coleccion = [];
+let coleccion = cargarProgreso();
 let cooldown = false;
 
 function renderAlbum() {
   albumDiv.innerHTML = "";
 
   const categorias = {};
-
   totalFiguritas.forEach(fig => {
     if (!categorias[fig.tipo]) categorias[fig.tipo] = [];
     categorias[fig.tipo].push(fig);
@@ -160,6 +159,7 @@ function abrirSobre() {
     }
   });
 
+  guardarProgreso();
   renderAlbum();
   iniciarCooldown();
 }
@@ -181,6 +181,22 @@ function iniciarCooldown() {
       imgSobreBloqueado.style.display = "none";
     }
   }, 1000);
+}
+
+function guardarProgreso() {
+  localStorage.setItem("coleccionRochel", JSON.stringify(coleccion));
+}
+
+function cargarProgreso() {
+  const guardado = localStorage.getItem("coleccionRochel");
+  if (guardado) {
+    try {
+      return JSON.parse(guardado);
+    } catch {
+      return [];
+    }
+  }
+  return [];
 }
 
 abrirBtn.addEventListener("click", abrirSobre);
