@@ -1,105 +1,113 @@
-const janijimNombres = [
-  "Alex", "Khanis", "Milo", "Yoni", "Aby", "Alma", "Cata", "Dan", "Dani.K", "Ivo",
-  "Jaz", "Juli", "Lolo", "Mateo", "Nacho", "Paula", "Ramiro", "Schniper", "Yair",
-  "Siano", "Sophie", "Tiago", "Wais", "Toto", "Uri", "Widder", "Wolko", "Benja",
-  "Dani.M", "Emma", "Espe", "Maayan", "Sharon", "Sofia.K", "Tali", "Ari"
-];
+document.addEventListener("DOMContentLoaded", () => {
+  const janijimNombres = [
+    "Alex", "Khanis", "Milo", "Yoni", "Aby", "Alma", "Cata", "Dan", "DaniK", "Ivo",
+    "Jaz", "Juli", "Lolo", "Mateo", "Nacho", "Paula", "Ramiro", "Schniper", "Yair",
+    "Siano", "Sophie", "Tiago", "Wais", "Toto", "Uri", "Widder", "Wolko", "Benja",
+    "DaniM", "Emma", "Espe", "Maayan", "Sharon", "SofiaK", "Tali", "Ari"
+  ];
 
-const madrijimNombres = ["Iara.F", "Diego", "Rossman", "Vicky"];
-const mejanNombres = ["Igal", "Iara.N"];
-const leyendasNombres = ["Puachi", "Mile", "Chiara", "Adri", "Cande", "Maia", "Guido", "Thiago.R"];
-const grupoFotos = [
-  "https://picsum.photos/300/150?random=1",
-  "https://picsum.photos/300/150?random=2",
-  "https://picsum.photos/300/150?random=3",
-  "https://picsum.photos/300/150?random=4",
-  "https://picsum.photos/300/150?random=5"
-];
+  const madrijimNombres = ["IaraF", "Diego", "Rossman", "Vicky"];
+  const mejanNombres = ["Igal", "IaraN"];
+  const leyendasNombres = ["Puachi", "Mile", "Chiara", "Adri", "Cande", "Maia", "Guido", "ThiagoR"];
 
-const totalFiguritas = [];
-let idCounter = 1;
+  // Cambié aquí: fotos de grupo con nombres compatibles con archivos locales
+  const grupoFotosNombres = ["FotoGrupo1", "FotoGrupo2", "FotoGrupo3", "FotoGrupo4", "FotoGrupo5"];
 
-function crearFiguritas(nombres, tipo) {
-  nombres.forEach(nombre => {
-    totalFiguritas.push({
-      id: idCounter,
-      numero: idCounter,
-      nombre,
-      tipo,
-      imagen: `https://api.dicebear.com/8.x/bottts-neutral/svg?seed=${encodeURIComponent(nombre)}`
+  const totalFiguritas = [];
+  let idCounter = 1;
+
+  function crearFiguritas(nombres, tipo) {
+    nombres.forEach(nombre => {
+      totalFiguritas.push({
+        id: idCounter,
+        numero: idCounter,
+        nombre,
+        tipo
+      });
+      idCounter++;
     });
-    idCounter++;
-  });
-}
+  }
 
-crearFiguritas(janijimNombres, "janij");
-crearFiguritas(madrijimNombres, "madrij");
-crearFiguritas(mejanNombres, "mejan");
-crearFiguritas(leyendasNombres, "leyenda");
+  crearFiguritas(janijimNombres, "janij");
+  crearFiguritas(madrijimNombres, "madrij");
+  crearFiguritas(mejanNombres, "mejan");
+  crearFiguritas(leyendasNombres, "leyenda");
+  crearFiguritas(grupoFotosNombres, "foto");
 
-grupoFotos.forEach((url, i) => {
-  totalFiguritas.push({
-    id: idCounter,
-    numero: idCounter,
-    nombre: `Foto Grupo ${i + 1}`,
-    tipo: "foto",
-    imagen: url
-  });
-  idCounter++;
-});
+  // Manejo de imágenes locales
+  function encontrarImagen(nombreBase) {
+    const extensiones = ['png', 'jpg', 'jpeg'];
+    for (let ext of extensiones) {
+      const ruta = `fotos/${nombreBase}.${ext}`;
+      if (imagenesDisponibles.includes(ruta)) return ruta;
+    }
+    return 'fotos/fallback.png';
+  }
 
-const albumDiv = document.getElementById("album");
-const sobreDiv = document.getElementById("sobre-abierto");
-const abrirBtn = document.getElementById("abrir-sobre");
-const timerDiv = document.getElementById("timer");
-const imgSobreBloqueado = document.getElementById("sobre-bloqueado-img");
+  let imagenesDisponibles = [];
 
-let coleccion = cargarProgreso();
-let cooldown = false;
+  function precargarImagenes() {
+    const nombres = totalFiguritas.map(f => f.nombre.replace(/\s|\./g, ''));
+    const extensiones = ['png', 'jpg', 'jpeg'];
 
-function renderAlbum() {
-  albumDiv.innerHTML = "";
+    nombres.forEach(nombre => {
+      extensiones.forEach(ext => {
+        const ruta = `fotos/${nombre}.${ext}`;
+        const img = new Image();
+        img.src = ruta;
+        img.onload = () => {
+          if (!imagenesDisponibles.includes(ruta)) {
+            imagenesDisponibles.push(ruta);
+          }
+        };
+      });
+    });
 
-  const categorias = {};
-  totalFiguritas.forEach(fig => {
-    if (!categorias[fig.tipo]) categorias[fig.tipo] = [];
-    categorias[fig.tipo].push(fig);
-  });
+    // Agrega el fallback también
+    imagenesDisponibles.push('fotos/fallback.png');
+    imagenesDisponibles.push('fotos/fallback.jpg');
+  }
 
-  const ordenCategorias = ["janij", "madrij", "mejan", "leyenda", "foto"];
+  precargarImagenes();
 
-  ordenCategorias.forEach(tipo => {
-    if (!categorias[tipo]) return;
+  const albumDiv = document.getElementById("album");
+  const sobreDiv = document.getElementById("sobre-abierto");
+  const abrirBtn = document.getElementById("abrir-sobre");
+  const timerDiv = document.getElementById("timer");
+  const imgSobreBloqueado = document.getElementById("sobre-bloqueado-img");
 
-    const titulo = document.createElement("h3");
-    const nombresTipo = {
-      janij: "Janijim",
-      madrij: "Madrijim",
-      mejan: "Mejan",
-      leyenda: "Leyendas",
-      foto: "Fotos del grupo"
-    };
-    titulo.textContent = nombresTipo[tipo] || tipo;
-    titulo.style.marginTop = "30px";
-    albumDiv.appendChild(titulo);
+  let coleccion = JSON.parse(localStorage.getItem("coleccionRochel")) || [];
+  let cooldown = false;
 
-    const contenedor = document.createElement("div");
-    contenedor.style.display = "flex";
-    contenedor.style.flexWrap = "wrap";
-    contenedor.style.justifyContent = "center";
-    contenedor.style.gap = "10px";
-    albumDiv.appendChild(contenedor);
+  function renderAlbum() {
+    albumDiv.innerHTML = "";
 
-    categorias[tipo]
-      .sort((a, b) => a.numero - b.numero)
-      .forEach(fig => {
-        const div = document.createElement("div");
+    const categorias = ["janij", "madrij", "mejan", "leyenda", "foto"];
+
+    categorias.forEach(cat => {
+      const subtitulo = document.createElement("h3");
+      subtitulo.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+      albumDiv.appendChild(subtitulo);
+
+      const contenedor = document.createElement("div");
+      contenedor.style.display = "flex";
+      contenedor.style.flexWrap = "wrap";
+      contenedor.style.justifyContent = "center";
+      contenedor.style.gap = "10px";
+
+      const figs = totalFiguritas.filter(f => f.tipo === cat);
+
+      figs.forEach(fig => {
         const pegada = coleccion.includes(fig.id);
+        const div = document.createElement("div");
         div.className = `figurita ${pegada ? "" : "faltante"}`;
+
+        const nombreBase = fig.nombre.replace(/\s|\./g, '');
+        const imgSrc = encontrarImagen(nombreBase);
 
         if (pegada) {
           div.innerHTML = `
-            <img src="${fig.imagen}" alt="${fig.nombre}">
+            <img src="${imgSrc}" alt="${fig.nombre}">
             <p>${fig.nombre}</p>
             <small class="tipo ${fig.tipo}">${fig.tipo}</small>
             <small class="numero">${fig.numero}</small>
@@ -114,90 +122,80 @@ function renderAlbum() {
 
         contenedor.appendChild(div);
       });
-  });
-}
 
-function abrirSobre() {
-  if (cooldown) return;
-  cooldown = true;
-  abrirBtn.disabled = true;
-
-  const nuevas = [];
-  const disponibles = totalFiguritas.filter(f => !coleccion.includes(f.id));
-
-  while (nuevas.length < 5 && disponibles.length > 0) {
-    const randIndex = Math.floor(Math.random() * disponibles.length);
-    nuevas.push(disponibles[randIndex]);
-    disponibles.splice(randIndex, 1);
+      albumDiv.appendChild(contenedor);
+    });
   }
 
-  while (nuevas.length < 5) {
-    const rand = totalFiguritas[Math.floor(Math.random() * totalFiguritas.length)];
-    nuevas.push(rand);
-  }
+  function abrirSobre() {
+    if (cooldown) return;
+    cooldown = true;
+    abrirBtn.disabled = true;
 
-  sobreDiv.innerHTML = "";
-  nuevas.forEach(fig => {
-    const mini = document.createElement("div");
-    mini.className = "figurita";
-    mini.style.transform = "scale(0.5) rotate(-10deg)";
-    mini.innerHTML = `
-      <img src="${fig.imagen}" alt="${fig.nombre}">
-      <p>${fig.nombre}</p>
-      <small class="tipo ${fig.tipo}">${fig.tipo}</small>
-      <small class="numero">${fig.numero}</small>
-    `;
-    sobreDiv.appendChild(mini);
+    const nuevas = [];
+    const disponibles = totalFiguritas.filter(f => !coleccion.includes(f.id));
 
-    setTimeout(() => {
-      mini.style.transition = "transform 0.5s ease";
-      mini.style.transform = "scale(1) rotate(0deg)";
-    }, 100);
-
-    if (!coleccion.includes(fig.id)) {
-      coleccion.push(fig.id);
+    while (nuevas.length < 5 && disponibles.length > 0) {
+      const randIndex = Math.floor(Math.random() * disponibles.length);
+      nuevas.push(disponibles[randIndex]);
+      disponibles.splice(randIndex, 1);
     }
-  });
 
-  guardarProgreso();
-  renderAlbum();
-  iniciarCooldown();
-}
+    while (nuevas.length < 5) {
+      const rand = totalFiguritas[Math.floor(Math.random() * totalFiguritas.length)];
+      nuevas.push(rand);
+    }
 
-function iniciarCooldown() {
-  let tiempo = 20;
-  timerDiv.style.display = "block";
-  imgSobreBloqueado.style.display = "inline-block";
-  timerDiv.textContent = `Siguiente sobre en ${tiempo}s`;
+    sobreDiv.innerHTML = "";
+    nuevas.forEach(fig => {
+      const mini = document.createElement("div");
+      mini.className = "figurita";
+      mini.style.transform = "scale(0.5) rotate(-10deg)";
+      const nombreBase = fig.nombre.replace(/\s|\./g, '');
+      const imgSrc = encontrarImagen(nombreBase);
 
-  const intervalo = setInterval(() => {
-    tiempo--;
+      mini.innerHTML = `
+        <img src="${imgSrc}" alt="${fig.nombre}">
+        <p>${fig.nombre}</p>
+        <small class="tipo ${fig.tipo}">${fig.tipo}</small>
+        <small class="numero">${fig.numero}</small>
+      `;
+      sobreDiv.appendChild(mini);
+
+      setTimeout(() => {
+        mini.style.transition = "transform 0.5s ease";
+        mini.style.transform = "scale(1) rotate(0deg)";
+      }, 100);
+
+      if (!coleccion.includes(fig.id)) {
+        coleccion.push(fig.id);
+      }
+    });
+
+    localStorage.setItem("coleccionRochel", JSON.stringify(coleccion));
+    renderAlbum();
+    iniciarCooldown();
+  }
+
+  function iniciarCooldown() {
+    let tiempo = 20;
+    timerDiv.style.display = "block";
+    imgSobreBloqueado.style.display = "inline-block";
     timerDiv.textContent = `Siguiente sobre en ${tiempo}s`;
-    if (tiempo <= 0) {
-      clearInterval(intervalo);
-      cooldown = false;
-      abrirBtn.disabled = false;
-      timerDiv.style.display = "none";
-      imgSobreBloqueado.style.display = "none";
-    }
-  }, 1000);
-}
 
-function guardarProgreso() {
-  localStorage.setItem("coleccionRochel", JSON.stringify(coleccion));
-}
-
-function cargarProgreso() {
-  const guardado = localStorage.getItem("coleccionRochel");
-  if (guardado) {
-    try {
-      return JSON.parse(guardado);
-    } catch {
-      return [];
-    }
+    const intervalo = setInterval(() => {
+      tiempo--;
+      timerDiv.textContent = `Siguiente sobre en ${tiempo}s`;
+      if (tiempo <= 0) {
+        clearInterval(intervalo);
+        abrirBtn.disabled = false;
+        cooldown = false;
+        timerDiv.style.display = "none";
+        imgSobreBloqueado.style.display = "none";
+      }
+    }, 1000);
   }
-  return [];
-}
 
-abrirBtn.addEventListener("click", abrirSobre);
-renderAlbum();
+  abrirBtn.addEventListener("click", abrirSobre);
+  renderAlbum();
+});
