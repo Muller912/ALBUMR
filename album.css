@@ -1,6 +1,6 @@
 body {
     margin: 0;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #2b0032;
     color: #ffffff;
   }
@@ -114,6 +114,29 @@ body {
     color: #ff3355;
     font-weight: bold;
     margin-top: 1.5rem;
+  }
+  
+  small.tipo {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #ffccdd;
+  }
+  
+  /* Colores por categoría */
+  small.tipo.janij {
+    color: #a082ff;
+  }
+  
+  small.tipo.madrij {
+    color: #ff4466;
+  }
+  
+  small.tipo.leyenda {
+    color: #ffd700;
+    font-weight: 700;
   }
   
   #timer {
